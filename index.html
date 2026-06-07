@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Magical Birthday Kingdom</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+font-family:Arial,sans-serif;
+background:linear-gradient(180deg,#fff0f6,#ffe3f0,#ffd6e8,#ffb3d9);
+color:#8a0050;
+overflow-x:hidden;
+position:relative;
+min-height:100vh;
+}
+#sky{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.float{position:absolute;animation:floatUp linear infinite;z-index:2;opacity:0.6}
+
+@keyframes floatUp{
+0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:0}
+10%{opacity:0.7}
+90%{opacity:0.7}
+100%{transform:translateY(-130vh) translateX(40px) rotate(15deg);opacity:0}
+}
+
+/* Screen Flash Light when Coin is tossed */
+#flashOverlay {
+position: fixed; inset: 0; background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,182,193,0) 70%);
+z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.1s ease-out;
+}
+
+.hero{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;z-index:5;padding:20px}
+.card{background:rgba(255,255,255,.65);padding:35px 20px;border-radius:30px;backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(255,105,180,0.15);width:100%;max-width:500px}
+.btn{padding:12px 22px;border:none;border-radius:30px;background:#ff5ea8;color:white;cursor:pointer;font-weight:bold;margin:5px;box-shadow:0 4px 10px rgba(0,0,0,0.1);transition:0.2s}
+.btn:hover{background:#ff3b93;transform:translateY(-2px)}
+section{padding:60px 15px;text-align:center;position:relative;z-index:5;max-width:600px;margin:0 auto}
+
+/* Coin Toss Container Mechanics */
+.fountain-container {
+position: relative;
+width: 100%;
+max-width: 300px;
+margin: auto;
+padding-top: 100px; /* Space for the coin to float above */
+}
+
+.coin{
+width:70px;height:70px;border-radius:50%;background:gold;
+margin:0 auto;display:flex;align-items:center;justify-content:center;
+font-size:30px;cursor:pointer;position:absolute;top:0;left:0;right:0;z-index:15;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+transition:transform 0.8s cubic-bezier(0.55, 0.055, 0.675, 0.19), opacity 0.8s;
+}
+.press{font-weight:bold;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+
+/* Royal Blue Fountain Pot */
+.fountain{
+width:100%;height:160px;
+border-radius:50%;
+background:radial-gradient(circle,#ffffff 10%,#54a0ff 50%,#0052cc 100%);
+border: 6px solid #2e86de;
+overflow:hidden;position:relative;z-index:10;
+box-shadow: 0 10px 25px rgba(0, 82, 204, 0.35);
+}
+.fountain:before{
+content:'';position:absolute;width:100%;height:40%;
+top:10%;background:rgba(255,255,255,.4);
+border-radius:50%;animation:wave 3s infinite;
+}
+@keyframes wave{50%{transform:translateX(10px)}}
+
+/* Responsive Cake Styling */
+.layer{height:55px;margin:2px auto;border-radius:15px;transform:scale(0);transition:.5s}
+.l1{width:90%;max-width:260px;background:#ff7dbc}
+.l2{width:75%;max-width:220px;background:#ff9ad0}
+.l3{width:60%;max-width:180px;background:#ffb9e2}
+.l4{width:45%;max-width:140px;background:#ffd7f1}
+.candle{width:14px;height:60px;background:white;margin:auto;transform:scale(0);transition:.5s}
+.flame{width:18px;height:24px;background:orange;border-radius:50%;margin:-12px auto 0;box-shadow: 0 0 10px orange}
+
+.envelope{font-size:100px;cursor:pointer;transition:transform 0.3s}
+.envelope:hover{transform:scale(1.1)}
+#letterBox{display:none;background:rgba(255,255,255,0.7);padding:20px;border-radius:20px;max-width:100%;margin:20px auto;box-shadow:0 5px 15px rgba(0,0,0,0.05)}
+#micBtn{display:none;margin:15px auto}
+.listening{animation:pulse 0.6s infinite;background:red !important}
+img{width:100%;max-width:320px;height:auto;border-radius:20px;margin-top:15px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:99;width:100vw;height:100vh}
+
+/* Mobile Responsiveness Viewports */
+@media (max-width: 480px) {
+    h1 { font-size: 24px; }
+    h2 { font-size: 20px; }
+    .card { padding: 25px 15px; }
+    .envelope { font-size: 80px; }
+    .btn { width: 100%; max-width: 280px; margin: 8px auto; display: block; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+<div id="flashOverlay"></div>
+
+<div id="sky"></div>
+
+<div class="hero">
+<div class="card">
+<h1>👑 Pink Princess Birthday Kingdom 👑</h1>
+<br><p>Welcome to your magical birthday celebration</p><br>
+<button class="btn" onclick="document.getElementById('wishsec').scrollIntoView({behavior:'smooth'})">Enter Kingdom</button>
+</div>
+</div>
+
+<section id="wishsec">
+<h2>🪙 Magical Wish Fountain</h2>
+<p class="press" id="pressText">PRESS THE COIN TO TOSS IT</p><br>
+<div class="fountain-container">
+    <div class="coin" id="coin" onclick="wish()">🪙</div>
+    <div class="fountain"></div>
+</div>
+<br>
+<h3 id="wishText">Make your magical wish...</h3>
+</section>
+
+<section>
+<h2>🎂 Build Your Royal 4 Layer Cake</h2><br>
+<div class="candle" id="candle"><div class="flame" id="flame"></div></div>
+<div class="layer l4" id="l4"></div>
+<div class="layer l3" id="l3"></div>
+<div class="layer l2" id="l2"></div>
+<div class="layer l1" id="l1"></div>
+<br>
+<button class="btn" onclick="buildCake()">Build Cake</button>
+<button class="btn" onclick="blow()">Blow Candle</button>
+</section>
+
+<section>
+<h2>💌 Birthday Envelope</h2>
+<div class="envelope" id="envelopeIcon" onclick="openLetter()">💌</div>
+<button id="micBtn" class="btn" onclick="startSpeechRecognition()">🎙️ Open Microphone & Speak</button>
+<div id="letterBox">
+<br>
+<img src="C:\mbdayy.html.jpg" alt="[Insert your image here]">
+<br><br>
+<h3>😂 Birthday Joke</h3>
+<p>Why did the birthday cake go to school? Because it wanted to be a smartie cake!</p>
+<br>
+<h2>💖 Birthday Letter 💖</h2>
+<p id="speechPrompt" style="color:#cc0066; font-weight:bold;">Say "Happy Birthday" or start talking to read the princess letter!</p>
+<div id="secretLetter" style="display:none;">
+    <p>Dear Princess,<br><br>
+    May your birthday be filled with happiness, sparkles, magical memories and endless smiles.<br>
+    Like the stars floating through the sky, may all your dreams rise high and come true.<br><br>
+    Happy Birthday 👑💗
+    </p>
+</div>
+</div>
+</section>
+
+<section>
+<h1>👑 HAPPY BIRTHDAY 👑</h1>
+<p>May all your wishes shine brighter than a thousand stars.</p>
+</section>
+
+<script>
+// Generate soft sparkles in background instead of lanterns
+const sky=document.getElementById('sky');
+const icons=['💖','✨','🌸','⭐'];
+for(let i=0;i<20;i++){
+ let f=document.createElement('div');
+ f.className='float';
+ f.innerHTML=icons[Math.floor(Math.random()*icons.length)];
+ f.style.left=Math.random()*100+'vw';
+ f.style.bottom='-50px';
+ f.style.fontSize=Math.random() * (20 - 14) + 14 + 'px';
+ f.style.animationDuration=(14+Math.random()*12)+'s';
+ sky.appendChild(f);
+}
+
+// Coin Toss Directly into Fountain Mechanics
+function wish(){
+ let c=document.getElementById('coin');
+ let flash=document.getElementById('flashOverlay');
+ let pressTxt=document.getElementById('pressText');
+ 
+ if(c.style.opacity === '0') return; // Prevent double clicks
+ 
+ pressTxt.style.opacity = '0';
+ 
+ // Flips and drops directly down into the center of the pot
+ c.style.transform='translateY(130px) scale(0.4) rotateX(720deg)';
+ 
+ setTimeout(() => {
+    c.style.opacity='0';
+    // Flash overlay triggers as it hits the water layer
+    flash.style.opacity = '1';
+    document.getElementById('wishText').innerHTML='✨ WISH GRANTED ✨';
+    launchConfetti();
+    
+    setTimeout(() => {
+        flash.style.opacity = '0';
+    }, 300);
+ }, 750);
+}
+
+let stage=0;
+const l1=document.getElementById('l1');
+const l2=document.getElementById('l2');
+const l3=document.getElementById('l3');
+const l4=document.getElementById('l4');
+const candle=document.getElementById('candle');
+
+function buildCake(){
+ stage++;
+ if(stage>=1) l1.style.transform='scale(1)';
+ if(stage>=2) l2.style.transform='scale(1)';
+ if(stage>=3) l3.style.transform='scale(1)';
+ if(stage>=4) l4.style.transform='scale(1)';
+ if(stage>=5) candle.style.transform='scale(1)';
+}
+function blow(){
+ document.getElementById('flame').style.display='none';
+ launchConfetti();
+}
+
+function openLetter(){
+ document.getElementById('letterBox').style.display='block';
+ document.getElementById('micBtn').style.display='block';
+ document.getElementById('envelopeIcon').innerHTML = '📂';
+}
+
+// Audio Microphone Integration
+function startSpeechRecognition() {
+    const micBtn = document.getElementById('micBtn');
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!window.SpeechRecognition) {
+        alert("Speech Recognition is not supported in this browser. Showing letter directly!");
+        document.getElementById('secretLetter').style.display = 'block';
+        document.getElementById('speechPrompt').style.display = 'none';
+        return;
+    }
+
+    const recognition = new Recognition();
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    micBtn.classList.add('listening');
+    micBtn.innerText = "🎙️ Listening to you...";
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        micBtn.classList.remove('listening');
+        micBtn.innerText = "🎙️ Open Microphone & Speak";
+        
+        document.getElementById('speechPrompt').innerHTML = `<em>You said: "${transcript}"</em>`;
+        document.getElementById('secretLetter').style.display = 'block';
+    };
+
+    recognition.onerror = function() {
+        micBtn.classList.remove('listening');
+        micBtn.innerText = "🎙️ Open Microphone & Speak";
+        document.getElementById('secretLetter').style.display = 'block';
+    };
+}
+
+// Confetti Engine
+const canvas=document.getElementById('confetti');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+let p=[];
+function launchConfetti(){
+ for(let i=0;i<250;i++)p.push({x:Math.random()*canvas.width,y:-20,v:2+Math.random()*5,r:2+Math.random()*4});
+}
+function a(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle='#ff69b4';
+ p.forEach(o=>{o.y+=o.v;ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,6.28);ctx.fill();});
+ requestAnimationFrame(a);
+}
+window.addEventListener('resize', () => { canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+a();
+</script>
+</body>
+</html>
